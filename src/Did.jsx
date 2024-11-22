@@ -12,7 +12,6 @@ const DIDComponent = () => {
         didDocument: "",
         uri: "",
     });
-    const [didEntry, setDidEntry] = useState(null);
 
     // Connect to XRPL Client
     const connectClient = async () => {
@@ -126,44 +125,6 @@ const DIDComponent = () => {
             }
         }
     };
-    const fetchDID = async () => {
-        try {
-            await connectClient();
-
-            if (!wallet) {
-                setStatus(
-                    "No wallet available. Generate and fund a wallet first."
-                );
-                return;
-            }
-
-            setStatus("Fetching DID ledger entry...");
-
-            const response = await client.request({
-                command: "ledger_entry",
-                ledger_index: "validated",
-                index: wallet.getXAddress(), // Use the correct index for the DID ledger entry
-            });
-
-            setDidEntry({
-                Account: response.result.node.Account,
-                DIDDocument: response.result.node.DIDDocument,
-                Data: response.result.node.Data,
-                Flags: response.result.node.Flags,
-                LedgerEntryType: response.result.node.LedgerEntryType,
-                OwnerNode: response.result.node.OwnerNode,
-                PreviousTxnID: response.result.node.PreviousTxnID,
-                PreviousTxnLgrSeq: response.result.node.PreviousTxnLgrSeq,
-                URI: response.result.node.URI,
-                index: response.result.index,
-            });
-
-            setStatus("DID ledger entry retrieved successfully.");
-        } catch (error) {
-            console.error("Error fetching DID entry:", error);
-            setStatus("Error fetching DID ledger entry.");
-        }
-    };
 
     // Utility function to hex-encode strings
     const toHex = (str) => Buffer.from(str, "utf8").toString("hex");
@@ -206,11 +167,6 @@ const DIDComponent = () => {
                 <button onClick={createDID} disabled={!wallet}>
                     Submit DIDSet Transaction
                 </button>
-            </div>
-            <div>
-                <h2>Fetch DID Entry</h2>
-                <button onClick={fetchDID}>Fetch DID</button>
-                {didEntry && <pre>{JSON.stringify(didEntry, null, 2)}</pre>}
             </div>
         </div>
     );
