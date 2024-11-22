@@ -1,40 +1,32 @@
 import React, { useState } from "react";
 import { Client, Wallet } from "xrpl";
 
-// Helper function to generate a mock key pair (for example purposes)
-const generateKeyPair = () => {
-    // In a real app, you'd use a proper cryptographic library to generate the keys.
-    const privateKey = "7c1f15e90f6b3a25...";
-    const publicKey = "02a1633cac4ab4...";
-    return { privateKey, publicKey };
-};
+// URL pointing to the DID document that will be registered on the XRP Ledger
+const DID_DOCUMENT_URL =
+    "https://bafybeibg6qulsbojjteg737cibb2gpoplspwus3jxpwkz2xjr4kwsdw4vy.ipfs.dweb.link?filename=didDocument.json";
 
-// Helper function to simulate VC creation and encryption
-const encryptVC = (vc, recipientPublicKey) => {
-    // Simulate encryption with recipient's public key
-    // In a real app, you'd use a proper encryption library like RSA-OAEP or ECIES
-    const encryptedVC = "Base64EncodedEncryptedData"; // Mock encrypted VC
-    return {
-        encryptedVC,
-        encryptionMetadata: {
-            algorithm: "RSA-OAEP", // Mock encryption algorithm
-            key: recipientPublicKey,
-            nonce: "RandomNonce", // Mock nonce for encryption
+// Sample encrypted VC data for demonstration purposes
+const encryptedVCData = {
+    credentials: [
+        {
+            id: "https://example.org/credentials/3732",
+            encryptedVC: "Base64EncodedEncryptedData", // Replace with actual encrypted VC
+            encryptionMetadata: {
+                algorithm: "RSA-OAEP",
+                key: "Base64EncodedPublicKeyOfRecipient", // Replace with actual public key
+                nonce: "RandomNonce", // Replace with actual nonce used for encryption
+            },
         },
-    };
+    ],
 };
 
 const DIDComponent = () => {
-    const [privateKey, setPrivateKey] = useState("");
-    const [publicKey, setPublicKey] = useState("");
     const [didTransaction, setDidTransaction] = useState("");
     const [status, setStatus] = useState("Not connected to XRPL");
     const [wallet, setWallet] = useState(null);
     const [client] = useState(
         new Client("wss://s.altnet.rippletest.net:51233")
     );
-    const [vc, setVC] = useState(""); // State for the created VC
-    const [encryptedVC, setEncryptedVC] = useState(""); // State for the encrypted VC
 
     // Connect to XRPL Client
     const connectClient = async () => {
@@ -91,66 +83,82 @@ const DIDComponent = () => {
         }
     };
 
-    const handleGenerateDID = () => {
-        // Generate the key pair
-        const { privateKey, publicKey } = generateKeyPair();
-        setPrivateKey(privateKey);
-        setPublicKey(publicKey);
+    const handleGenerateDID = async () => {
+        if (!wallet) {
+            setStatus("No wallet available. Generate a wallet first.");
+            return;
+        }
 
-        // Create the DID JSON document
+        const { classicAddress, publicKey } = wallet;
+
+        // Generate the DID Document
         const didDocument = {
             "@context": "https://www.w3.org/ns/did/v1",
-            id: "did:xrpl:1234abcd",
+            id: `did:xrpl:${classicAddress}`, // Use the wallet address as part of the DID
             authentication: [
                 {
                     type: "Ed25519VerificationKey2020",
-                    publicKey: publicKey,
+                    publicKeyMultibase: `z${publicKey}`, // Ensure public key is in base58 format
                 },
             ],
         };
 
-        // Create the DIDSet transaction
-        const transaction = {
-            TransactionType: "DIDSet",
-            Account: wallet.classicAddress, // Replace with real XRPL account
-            DIDDocument: didDocument,
-        };
+        // Prepare the DIDSet transaction
+        try {
+            const preparedTransaction = await client.autofill({
+                TransactionType: "DIDSet",
+                Account: classicAddress,
+                URI: Buffer.from(DID_DOCUMENT_URL).toString("hex"), // Convert URL to hex format
+            });
 
-        setDidTransaction(JSON.stringify(transaction, null, 2)); // Format the transaction for display
-    };
+            // Sign and submit the DIDSet transaction
+            const signedTransaction = wallet.sign(preparedTransaction);
+            const result = await client.submitAndWait(
+                signedTransaction.tx_blob
+            );
 
-    const handleCreateVC = () => {
-        const vc = {
-            id: "https://example.org/credentials/3732",
-            issuer: `did:xrpl:${wallet.classicAddress}`, // Using account as issuer
-            issued: new Date().toISOString(),
-            credentialSubject: {
-                id: `did:xrpl:${wallet.classicAddress}`, // The DID of the subject
-                name: "John Doe",
-                birthDate: "1990-01-01",
-                nationality: "French",
-            },
-            proof: {
-                type: "Ed25519Signature2020",
-                created: new Date().toISOString(),
-                proofPurpose: "assertionMethod",
-                verificationMethod: `did:xrpl:${wallet.classicAddress}#key-1`,
-                jws: "eyJhbGciOiJFZDI1N...SIGNATURE", // Mock JWS signature
-            },
-        };
-
-        setVC(JSON.stringify(vc, null, 2)); // Display VC
-    };
-
-    const handleEncryptVC = () => {
-        if (!publicKey) {
-            alert("Please generate a public key first.");
-            return;
+            setDidTransaction(JSON.stringify(result, null, 2));
+            setStatus("DID transaction completed successfully.");
+        } catch (error) {
+            console.error("Error preparing DIDSet transaction:", error);
+            setStatus("Error preparing DIDSet transaction");
         }
+    };
 
-        // Encrypt the VC using the recipient's public key (simulated)
-        const encryptedData = encryptVC(JSON.parse(vc), publicKey);
-        setEncryptedVC(JSON.stringify(encryptedData, null, 2)); // Display encrypted VC
+    // Handle the secure storage of the encrypted VC (store locally)
+    const handleStoreVC = async () => {
+        try {
+            if (!wallet) {
+                setStatus("No wallet available. Generate a wallet first.");
+                return;
+            }
+
+            // Save the encrypted VC to the wallet (in a local storage format)
+            const vcData = {
+                credentials: [
+                    {
+                        id: encryptedVCData.credentials[0].id,
+                        encryptedVC: encryptedVCData.credentials[0].encryptedVC,
+                        encryptionMetadata:
+                            encryptedVCData.credentials[0].encryptionMetadata,
+                    },
+                ],
+            };
+
+            // Here we can store the VC securely in localStorage or a decentralized storage option
+            // For local storage example:
+            localStorage.setItem("encryptedVC", JSON.stringify(vcData));
+            setStatus("Encrypted VC stored securely in local storage.");
+
+            // For decentralized storage (e.g., IPFS or Arweave), we could use a package like `ipfs-http-client`
+            // or other decentralized storage services, but that requires additional setup and authentication.
+            // Example:
+            // const ipfsResponse = await ipfs.add(JSON.stringify(vcData));
+            // setStatus(`VC stored on IPFS: ${ipfsResponse.path}`);
+        } catch (error) {
+            console.error("Error storing VC:", error);
+            setStatus("Error storing VC");
+        }
     };
 
     return (
@@ -163,18 +171,22 @@ const DIDComponent = () => {
                 Fund Wallet
             </button>
             <div>
-                <h3>Étape 1.1: Génération de la paire de clés</h3>
-                <button onClick={handleGenerateDID}>
-                    Générer la paire de clés et DID
+                <h3>Étape 1.1: Génération de la paire de clés et DID</h3>
+                <button onClick={handleGenerateDID}>Générer le DID</button>
+            </div>
+            <div>
+                <h3>Étape 3: Stockage sécurisé du VC</h3>
+                <button onClick={handleStoreVC} disabled={!wallet}>
+                    Store Encrypted VC Securely
                 </button>
             </div>
 
-            {privateKey && publicKey && (
+            {wallet && (
                 <div>
                     <h4>Clé Privée:</h4>
-                    <pre>{privateKey}</pre>
+                    <pre>{wallet.privateKey}</pre>
                     <h4>Clé Publique:</h4>
-                    <pre>{publicKey}</pre>
+                    <pre>{wallet.publicKey}</pre>
                 </div>
             )}
 
@@ -184,30 +196,6 @@ const DIDComponent = () => {
                     <pre>{didTransaction}</pre>
                 </div>
             )}
-
-            <div>
-                <h3>Étape 2.1: Création du Credential (VC)</h3>
-                <button onClick={handleCreateVC}>Créer le Credential</button>
-                {vc && (
-                    <div>
-                        <h4>VC (Credential) JSON:</h4>
-                        <pre>{vc}</pre>
-                    </div>
-                )}
-            </div>
-
-            <div>
-                <h3>Étape 2.2: Chiffrement du Credential</h3>
-                <button onClick={handleEncryptVC}>
-                    Chiffrer le Credential
-                </button>
-                {encryptedVC && (
-                    <div>
-                        <h4>VC Chiffré:</h4>
-                        <pre>{encryptedVC}</pre>
-                    </div>
-                )}
-            </div>
         </div>
     );
 };
