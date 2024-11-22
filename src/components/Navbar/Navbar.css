@@ -1,0 +1,76 @@
+/* Import des polices si via un CDN */
+@import url('https://fonts.cdnfonts.com/css/circular-std');
+@import url('https://fonts.cdnfonts.com/css/unbounded');
+
+/* Barre de navigation principale */
+.navbar {
+    width: 100%;
+    background-color: #fff; /* Correspond au fond global */
+    color: white;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    transform: none;
+    z-index: 1000;
+    border-top: 2px solid #1aa4ff; /* Ligne de séparation en bleu clair */
+    padding: 15px; /* Padding uniforme */
+    font-family: "Circular Std", Arial, sans-serif; /* Police principale */
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.3); /* Ombre douce */
+}
+
+/* Conteneur des éléments de navigation */
+.navbar-nav {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    align-items: center; /* Centrer les éléments verticalement */
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+}
+
+/* Élément individuel de la navbar */
+.nav-item {
+    padding: 10px 15px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow: visible;
+}
+
+/* Lien de navigation */
+.nav-link {
+    color: #1aa4ff; /* Couleur des liens en bleu clair */
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    font-family: "Unbounded", Arial, sans-serif; /* Police principale */
+    letter-spacing: 1px; /* Espacement entre les lettres */
+    transition: transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease; /* Transition fluide */
+}
+
+/* Effet au survol des liens */
+.navbar .nav-link:hover {
+    color: #791aff; /* Change la couleur en blanc */
+    text-shadow: 0 0 0 rgba(0, 0, 0, 0.5); /* Ombre douce */
+    transition: color 0.3s ease; /* Animation fluide */
+}
+
+/* Lien actif */
+.nav-link.active {
+    color: #000637; /* Couleur blanche pour le lien actif */
+}
+
+/* Médias queries pour les écrans de taille mobile */
+@media (max-width: 600px) {
+    .navbar {
+        padding: 10px 0;
+        border-top: 1px solid #1aa4ff; /* Ligne de séparation plus fine pour les petits écrans */
+    }
+
+    .nav-link {
+        font-size: 14px; /* Taille de police légèrement réduite */
+    }
+
+    .nav-item {
+        padding: 10px 5px;
+    }
+}

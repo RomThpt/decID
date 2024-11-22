@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Client, Wallet } from "xrpl";
 import { pinata } from "./EncryptDidDocument.jsx";
+import './Did.css'
 
 // URL pointing to the DID document that will be registered on the XRP Ledger
 const DID_DOCUMENT_URL =
@@ -158,32 +159,40 @@ const DIDComponent = () => {
     };
 
     return (
-        <div>
-            <h1>Générer un DID et un Credential via XRPL</h1>
-            <p>Status: {status}</p>
-            <button onClick={connectClient}>Connect to XRPL</button>
-            <button onClick={generateWallet}>Generate Wallet</button>
-            <button onClick={fundWallet} disabled={!wallet}>
-                Fund Wallet
+        <div className="did-container">
+          <h1 className="did-title">Generate a DID and a Credential via XRPL</h1>
+          <p className="did-status">Status: {status}</p>
+          <div className="did-buttons">
+            <button onClick={connectClient} className="did-button connect">
+              Connect to XRPL
             </button>
-            <br />
-            <button onClick={connectWallet}>Connect Wallet</button>
-            <div>
-                <h3>Génération de la paire de clés et DID</h3>
-                <button onClick={handleGenerateDID}>Générer le DID</button>
+            <button onClick={generateWallet} className="did-button wallet">
+              Generate Wallet
+            </button>
+            <button
+              onClick={fundWallet}
+              className={`did-button fund ${!wallet ? "disabled" : ""}`}
+              disabled={!wallet}
+            >
+              Fund Wallet
+            </button>
+            <button onClick={connectWallet} className="did-button wallet">
+              Connect Wallet
+            </button>
+          </div>
+          <div className="did-section">
+            <button onClick={handleGenerateDID} className="did-button did">
+              Generate the DID
+            </button>
+          </div>
+          {didTransaction && (
+            <div className="did-transaction">
+              <h3>Transaction DIDSet:</h3>
+              <pre>{didTransaction}</pre>
             </div>
-
-            {didTransaction && (
-                <div>
-                    <h3>Transaction DIDSet:</h3>
-                    <pre>{didTransaction}</pre>
-                </div>
-            )}
-            {/* <p>
-                {didTransaction.meta.AffectedNodes[0].CreatedNode.LedgerIndex}
-            </p> */}
+          )}
         </div>
-    );
+      );      
 };
 
 export default DIDComponent;

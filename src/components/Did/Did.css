@@ -1,0 +1,94 @@
+/* Import des polices si via un CDN */
+@import url('https://fonts.cdnfonts.com/css/circular-std');
+@import url('https://fonts.cdnfonts.com/css/unbounded');
+
+/* Styles globaux */
+body {
+    font-family: "Circular Std", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #000637; /* Fond du body */
+    color: white; /* Texte par défaut en blanc */
+}
+
+/* Conteneur principal */
+.did-container {
+    width: 100%; /* Prend toute la largeur */
+    padding: 20px;
+    margin: 0; /* Pas de marge */
+    background-color: transparent; /* Fond transparent pour se fondre avec le body */
+    box-shadow: none; /* Pas d'ombre */
+    border-radius: 0; /* Pas d'arrondi */
+    color: inherit; /* Hérite de la couleur du body */
+}
+
+/* Titre principal */
+.did-title {
+    font-size: 48px;
+    color: white;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Statut */
+.did-status {
+    font-size: 16px;
+    color: white;
+    margin-bottom: 20px;
+}
+
+/* Boutons */
+.did-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.did-button {
+    padding: 10px 20px;
+    border: 2px solid #1aa4ff; /* Couleur du contour */
+    font-size: 16px;
+    border-radius: 50px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #1aa4ff; /* Couleur de fond */
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    font-family: "Unbounded", Arial, sans-serif;
+    letter-spacing: 1px; 
+}
+
+.did-button:hover {
+    background-color: #000637; /* Couleur de fond au hover */
+    color: white; /* Texte reste blanc */
+    border-color: #1aa4ff; /* Couleur du contour reste inchangée */
+}
+
+.did-button.disabled {
+    background-color: #ddd; /* Fond désactivé */
+    color: #aaa; /* Texte désactivé */
+    border-color: #ddd; /* Contour désactivé */
+    cursor: not-allowed; /* Curseur non autorisé */
+}
+
+/* Section DID génération */
+.did-section {
+    margin-top: 20px;
+    text-align: center;
+    color: white; /* Texte en blanc */
+}
+
+/* Transaction display */
+.did-transaction {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #ccc;
+    border-radius: 50px;
+    overflow-x: auto;
+    font-family: "Circular Std", Arial, sans-serif;
+    font-size: 14px;
+    color: #000637; /* Texte sombre */
+}
