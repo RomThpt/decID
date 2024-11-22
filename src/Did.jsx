@@ -1,24 +1,10 @@
 import React, { useState } from "react";
 import { Client, Wallet } from "xrpl";
+import { pinata } from "./EncryptDidDocument.jsx";
 
 // URL pointing to the DID document that will be registered on the XRP Ledger
 const DID_DOCUMENT_URL =
-    "https://bafybeibg6qulsbojjteg737cibb2gpoplspwus3jxpwkz2xjr4kwsdw4vy.ipfs.dweb.link?filename=didDocument.json";
-
-// Sample encrypted VC data for demonstration purposes
-const encryptedVCData = {
-    credentials: [
-        {
-            id: "https://example.org/credentials/3732",
-            encryptedVC: "Base64EncodedEncryptedData", // Replace with actual encrypted VC
-            encryptionMetadata: {
-                algorithm: "RSA-OAEP",
-                key: "Base64EncodedPublicKeyOfRecipient", // Replace with actual public key
-                nonce: "RandomNonce", // Replace with actual nonce used for encryption
-            },
-        },
-    ],
-};
+    "ipfs://QmQxi8w49jC66v1JU7Qih6YEZSHjbBdLqJBPcCVVK6WqDX";
 
 const DIDComponent = () => {
     const [didTransaction, setDidTransaction] = useState("");
@@ -27,8 +13,8 @@ const DIDComponent = () => {
     const [client] = useState(
         new Client("wss://s.altnet.rippletest.net:51233")
     );
+    const [selectedFile, setSelectedFile] = useState();
 
-    // Connect to XRPL Client
     const connectClient = async () => {
         try {
             if (!client.isConnected()) {
@@ -41,14 +27,12 @@ const DIDComponent = () => {
         }
     };
 
-    // Generate Wallet
     const generateWallet = async () => {
         const newWallet = Wallet.generate();
         setWallet(newWallet);
         setStatus(`Wallet created: ${newWallet.classicAddress}`);
     };
 
-    // Fund Wallet Using Faucet
     const fundWallet = async () => {
         if (!wallet) {
             setStatus("No wallet available. Generate a wallet first.");
@@ -83,35 +67,83 @@ const DIDComponent = () => {
         }
     };
 
+    const handlePinata = async (didDocument) => {
+        try {
+            // Convert the DID document into a Blob
+            const blob = new Blob([JSON.stringify(didDocument, null, 2)], {
+                type: "application/json",
+            });
+
+            // Create a File object (optional, if you need a filename)
+            const file = new File([blob], "did-document.json", {
+                type: "application/json",
+            });
+
+            // Create a FormData instance and append the file
+            const formData = new FormData();
+            formData.append("file", file);
+
+            await pinata.upload.file(formData).then((result) => {});
+
+            // // Upload to Pinata using their API
+            // const response = await fetch(
+            //     "https://api.pinata.cloud/pinning/pinFileToIPFS",
+            //     {
+            //         method: "POST",
+            //         headers: {
+            //             Authorization: `Bearer YOUR_PINATA_JWT_TOKEN`, // Replace with your actual token
+            //         },
+            //         body: formData,
+            //     }
+            // );
+
+            // if (!response.ok) {
+            //     throw new Error("Failed to upload file to Pinata");
+            // }
+
+            // const result = await response.json();
+            // console.log("Uploaded to Pinata:", result);
+            // alert(
+            //     `File uploaded successfully! IPFS URL: https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`
+            // );
+        } catch (error) {
+            console.error("Error uploading file:", error);
+            alert("File upload failed. Check the console for more details.");
+        }
+    };
+
+    const connectWallet = () => {
+        setWallet(Wallet.fromSeed("sEd7diyVTjATP3n64LyaTBGEJVt2sji"));
+        setStatus("Wallet connected");
+    };
+
     const handleGenerateDID = async () => {
         if (!wallet) {
             setStatus("No wallet available. Generate a wallet first.");
             return;
         }
-
+        setStatus("Generating DID document...");
         const { classicAddress, publicKey } = wallet;
 
-        // Generate the DID Document
-        const didDocument = {
+        // TODO : Add with pinata or eeciesjs
+        const didDocument = JSON.stringify({
             "@context": "https://www.w3.org/ns/did/v1",
-            id: `did:xrpl:${classicAddress}`, // Use the wallet address as part of the DID
+            id: `did:xrpl:${classicAddress}`,
             authentication: [
                 {
                     type: "Ed25519VerificationKey2020",
-                    publicKeyMultibase: `z${publicKey}`, // Ensure public key is in base58 format
+                    publicKeyMultibase: `z${publicKey}`,
                 },
             ],
-        };
-
-        // Prepare the DIDSet transaction
+        });
+        // handlePinata(didDocument);
         try {
             const preparedTransaction = await client.autofill({
                 TransactionType: "DIDSet",
                 Account: classicAddress,
-                URI: Buffer.from(DID_DOCUMENT_URL).toString("hex"), // Convert URL to hex format
+                URI: Buffer.from(DID_DOCUMENT_URL).toString("hex"),
             });
 
-            // Sign and submit the DIDSet transaction
             const signedTransaction = wallet.sign(preparedTransaction);
             const result = await client.submitAndWait(
                 signedTransaction.tx_blob
@@ -125,42 +157,6 @@ const DIDComponent = () => {
         }
     };
 
-    // Handle the secure storage of the encrypted VC (store locally)
-    const handleStoreVC = async () => {
-        try {
-            if (!wallet) {
-                setStatus("No wallet available. Generate a wallet first.");
-                return;
-            }
-
-            // Save the encrypted VC to the wallet (in a local storage format)
-            const vcData = {
-                credentials: [
-                    {
-                        id: encryptedVCData.credentials[0].id,
-                        encryptedVC: encryptedVCData.credentials[0].encryptedVC,
-                        encryptionMetadata:
-                            encryptedVCData.credentials[0].encryptionMetadata,
-                    },
-                ],
-            };
-
-            // Here we can store the VC securely in localStorage or a decentralized storage option
-            // For local storage example:
-            localStorage.setItem("encryptedVC", JSON.stringify(vcData));
-            setStatus("Encrypted VC stored securely in local storage.");
-
-            // For decentralized storage (e.g., IPFS or Arweave), we could use a package like `ipfs-http-client`
-            // or other decentralized storage services, but that requires additional setup and authentication.
-            // Example:
-            // const ipfsResponse = await ipfs.add(JSON.stringify(vcData));
-            // setStatus(`VC stored on IPFS: ${ipfsResponse.path}`);
-        } catch (error) {
-            console.error("Error storing VC:", error);
-            setStatus("Error storing VC");
-        }
-    };
-
     return (
         <div>
             <h1>Générer un DID et un Credential via XRPL</h1>
@@ -170,25 +166,12 @@ const DIDComponent = () => {
             <button onClick={fundWallet} disabled={!wallet}>
                 Fund Wallet
             </button>
+            <br />
+            <button onClick={connectWallet}>Connect Wallet</button>
             <div>
-                <h3>Étape 1.1: Génération de la paire de clés et DID</h3>
+                <h3>Génération de la paire de clés et DID</h3>
                 <button onClick={handleGenerateDID}>Générer le DID</button>
             </div>
-            <div>
-                <h3>Étape 3: Stockage sécurisé du VC</h3>
-                <button onClick={handleStoreVC} disabled={!wallet}>
-                    Store Encrypted VC Securely
-                </button>
-            </div>
-
-            {wallet && (
-                <div>
-                    <h4>Clé Privée:</h4>
-                    <pre>{wallet.privateKey}</pre>
-                    <h4>Clé Publique:</h4>
-                    <pre>{wallet.publicKey}</pre>
-                </div>
-            )}
 
             {didTransaction && (
                 <div>
@@ -196,6 +179,9 @@ const DIDComponent = () => {
                     <pre>{didTransaction}</pre>
                 </div>
             )}
+            {/* <p>
+                {didTransaction.meta.AffectedNodes[0].CreatedNode.LedgerIndex}
+            </p> */}
         </div>
     );
 };

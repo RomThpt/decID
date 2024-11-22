@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "fs": "^0.0.1-security",
+    "ipfs-http-client": "^60.0.1",
+    "pinata-web3": "^0.5.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "xrpl": "^4.0.0"
