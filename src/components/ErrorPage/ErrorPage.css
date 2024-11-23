@@ -1,0 +1,45 @@
+/* Global styles for the error page */
+.error-page {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #000637; /* Dark background */
+    color: white; /* White text */
+    font-family: "Circular Std", Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+}
+
+.error-page h1 {
+    font-size: 120px;
+    margin: 0;
+    font-family: "Unbounded", Arial, sans-serif;
+    color: #ff4c4c; /* Bright red for the error */
+}
+
+.error-page p {
+    font-size: 20px;
+    margin: 20px 0;
+    color: white;
+}
+
+.go-back-button {
+    padding: 12px 24px;
+    font-size: 24px;
+    font-family: "Unbounded", Arial, sans-serif;
+    background-color: #1aa4ff;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease;
+}
+
+.go-back-button:hover {
+    background-color: #0056b3; /* Slightly darker color on hover */
+}

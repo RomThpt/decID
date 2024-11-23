@@ -1,0 +1,211 @@
+@import url('https://fonts.cdnfonts.com/css/circular-std');
+@import url('https://fonts.cdnfonts.com/css/unbounded');
+
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+main {
+    padding-top: 0px;
+}
+
+/* Fixed header */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 120px;
+    background-color: #000637;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+main, .app-container, .home-container, .profile-container {
+    margin-top: 40px;
+    padding: 0px;
+}
+
+/* Logo styling */
+.logo {
+    width: 180px;
+    height: auto;
+    cursor: pointer;
+    margin-left: 60px;
+    margin-top: 0px;
+}
+
+/* Login button */
+.login-button-global {
+    padding: 10px 20px;
+    border: 2px solid #1aa4ff;
+    font-size: 24px;
+    border-radius: 50px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #1aa4ff;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    font-family: "Unbounded", Arial, sans-serif;
+    letter-spacing: 1px;
+    z-index: 1000;
+    margin-right: 80px;
+}
+
+.login-button-global:hover {
+    background-color: #000637;
+    color: white;
+    border-color: #1aa4ff;
+}
+
+/* Logout button */
+.logout-button-global {
+    padding: 10px 20px;
+    border: 2px solid #ff671a;
+    font-size: 24px;
+    border-radius: 50px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #ff671a;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    font-family: "Unbounded", Arial, sans-serif;
+    letter-spacing: 1px;
+    z-index: 1000;
+    margin-right: 80px;
+}
+
+.logout-button-global:hover {
+    background-color: #000637;
+    color: white;
+    border-color: #ff671a;
+}
+
+/* Main container */
+.app-title {
+    font-size: 3rem;
+    margin-bottom: 50px;
+    margin-top: 80px;
+    text-align: center;
+}
+
+.app-container {
+    text-align: center;
+    width: 100%;
+    min-height: 150vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 20px;
+    box-sizing: border-box;
+    background-color: #000743;
+    transition: background-color 0.5s ease-in-out;
+    overflow-y: auto;
+    padding-bottom: 65px;
+}
+
+/* Individual category box */
+.category {
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 15px;
+    transition: background-color 0.5s ease-in-out, transform 0.3s ease;
+    background-color: #7a1aff;
+    width: 95vw;
+    box-sizing: border-box;
+}
+
+.category:hover {
+    transform: scale(1.05);
+    border-radius: 10px;
+}
+
+/* Category title */
+.category-title {
+    margin-bottom: 10px;
+    font-size: rem;
+    color: #ffffffb3;
+    text-align: center;
+    transition: color 0.3s ease-in-out;
+    width: 100%;
+}
+
+.category:hover .category-title {
+    color: white;
+}
+
+/* Buttons in category */
+.category-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.app-categories {
+    width: 100%;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+.app-category:hover {
+    background-color: #f5f5dc;
+    transform: scale(1.05);
+}
+
+/* General buttons */
+.app-button {
+    margin: 10px;
+    padding: 12px 24px;
+    border: 2px solid #1aa4ff;
+    font-size: 16px;
+    border-radius: 50px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #1aa4ff;
+    transition: background-color 0.3s ease-in-out, transform 0.3s ease;
+    font-family: "Unbounded", Arial, sans-serif;
+    letter-spacing: 1px;
+}
+
+.app-button:hover {
+    background-color: #000637;
+    color: white;
+    border-color: #1aa4ff;
+}
+
+/* Bottom description */
+.app-description {
+    font-size: 18px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    line-height: 1.8;
+    color: #ffffff;
+    font-family: "Circular Std", Arial, sans-serif;
+    width: 100%;
+    max-width: 1400px;
+    text-align: center;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.app-descri {
+    font-size: 18px;
+    margin-top: 40px;
+    margin-bottom: 50px;
+    line-height: 1.8;
+    color: #ffffff;
+    font-family: "Circular Std", Arial, sans-serif;
+    width: 90%;
+    max-width: 1400px;
+    text-align: center;
+    transition: opacity 0.5s ease-in-out;
+}
+
+html {
+    scroll-behavior: smooth;
+}
