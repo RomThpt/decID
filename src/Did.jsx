@@ -292,11 +292,11 @@ const DIDComponent = () => {
         }
     };
 
-    // Modification de getBirthDate pour utiliser le credentialSubject stocké
+    // Modification de getBirthDate pour ne retourner qu'un booléen
     const getBirthDate = () => {
         if (!storedCredentialSubject || !encryptionKeys) {
             setStatus("Pas de credentialSubject stocké ou clés manquantes");
-            return;
+            return false;
         }
 
         try {
@@ -308,12 +308,96 @@ const DIDComponent = () => {
             );
             
             const birthDate = decryptedSubject.birthDate;
-            setBirthDate(birthDate);
-            console.log("Date de naissance récupérée:", birthDate);
-            setStatus("Date de naissance récupérée avec succès");
+            const today = new Date();
+            const birth = new Date(birthDate);
+            const age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            
+            // Ajustement si le mois de naissance n'est pas encore passé cette année
+            const isAdult = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate()) 
+                ? age - 1 >= 18 
+                : age >= 18;
+
+            setStatus(isAdult ? "Oui" : "Non");
+            return isAdult;
         } catch (error) {
-            console.error("Erreur lors de la récupération de la date de naissance:", error);
-            setStatus("Erreur lors de la récupération de la date de naissance");
+            console.error("Erreur lors de la vérification de l'âge:", error);
+            setStatus("Erreur lors de la vérification de l'âge");
+            return false;
+        }
+    };
+
+    // Ajout de la fonction de vérification de la nationalité
+    const checkNationality = () => {
+        if (!storedCredentialSubject || !encryptionKeys) {
+            setStatus("Pas de credentialSubject stocké ou clés manquantes");
+            return false;
+        }
+
+        try {
+            const decryptedSubject = JSON.parse(
+                decrypt(
+                    encryptionKeys.privateKey.toHex(),
+                    Buffer.from(storedCredentialSubject, 'hex')
+                ).toString()
+            );
+            
+            const isFrench = decryptedSubject.nationality === "French";
+            setStatus(isFrench ? "Oui" : "Non");
+            return isFrench;
+        } catch (error) {
+            console.error("Erreur lors de la vérification de la nationalité:", error);
+            setStatus("Erreur lors de la vérification de la nationalité");
+            return false;
+        }
+    };
+
+    // Ajout des fonctions de vérification pour Italien et Anglais
+    const checkItalianNationality = () => {
+        if (!storedCredentialSubject || !encryptionKeys) {
+            setStatus("Pas de credentialSubject stocké ou clés manquantes");
+            return false;
+        }
+
+        try {
+            const decryptedSubject = JSON.parse(
+                decrypt(
+                    encryptionKeys.privateKey.toHex(),
+                    Buffer.from(storedCredentialSubject, 'hex')
+                ).toString()
+            );
+            
+            const isItalian = decryptedSubject.nationality === "Italian";
+            setStatus(isItalian ? "Oui" : "Non");
+            return isItalian;
+        } catch (error) {
+            console.error("Erreur lors de la vérification de la nationalité:", error);
+            setStatus("Erreur lors de la vérification de la nationalité");
+            return false;
+        }
+    };
+
+    const checkEnglishNationality = () => {
+        if (!storedCredentialSubject || !encryptionKeys) {
+            setStatus("Pas de credentialSubject stocké ou clés manquantes");
+            return false;
+        }
+
+        try {
+            const decryptedSubject = JSON.parse(
+                decrypt(
+                    encryptionKeys.privateKey.toHex(),
+                    Buffer.from(storedCredentialSubject, 'hex')
+                ).toString()
+            );
+            
+            const isEnglish = decryptedSubject.nationality === "English";
+            setStatus(isEnglish ? "Oui" : "Non");
+            return isEnglish;
+        } catch (error) {
+            console.error("Erreur lors de la vérification de la nationalité:", error);
+            setStatus("Erreur lors de la vérification de la nationalité");
+            return false;
         }
     };
 
@@ -343,8 +427,11 @@ const DIDComponent = () => {
             </div>
 
             <div>
-                <h3>4. Données sensibles</h3>
-                <button onClick={getBirthDate}>Récupérer la date de naissance</button>
+                <h3>4. Vérification</h3>
+                <button onClick={getBirthDate}>+ de 18 ans ?</button>
+                <button onClick={checkNationality}>Nationalité Française ?</button>
+                <button onClick={checkItalianNationality}>Nationalité Italienne ?</button>
+                <button onClick={checkEnglishNationality}>Nationalité Anglaise ?</button>
             </div>
 
             {verifiableCredential && (
@@ -368,10 +455,10 @@ const DIDComponent = () => {
                 </div>
             )}
 
-            {birthDate && (
+            {status && status !== "Not connected to XRPL" && (
                 <div>
-                    <h3>Date de naissance récupérée:</h3>
-                    <p>{birthDate}</p>
+                    <h3>Résultat de la vérification:</h3>
+                    <p>{status}</p>
                 </div>
             )}
         </div>
