@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "eciesjs": "^0.4.12",
     "fs": "^0.0.1-security",
     "ipfs-http-client": "^60.0.1",
     "pinata": "^1.8.1",
