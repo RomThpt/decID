@@ -35,6 +35,8 @@ const DIDComponent = () => {
     const [verifiableCredential, setVerifiableCredential] = useState(null); // VC non chiffré
     const [encryptedVC, setEncryptedVC] = useState(null); // VC chiffré
     const [client] = useState(new Client("wss://s.devnet.rippletest.net:51233")); // Client XRPL
+    const [birthDate, setBirthDate] = useState(null);
+    const [storedCredentialSubject, setStoredCredentialSubject] = useState(null);
 
     // Connexion au réseau XRPL
     const connectClient = async () => {
@@ -214,6 +216,7 @@ const DIDComponent = () => {
         }
     };
 
+    // Modification de handleDecryptVC pour enlever l'extraction de la date de naissance
     const handleDecryptVC = () => {
         if (!encryptedVC || !encryptionKeys) {
             setStatus("Pas de VC chiffré disponible");
@@ -221,8 +224,8 @@ const DIDComponent = () => {
         }
 
         try {
-            const decrypted = decryptVC(encryptedVC);
-            console.log("VC déchiffré:", decrypted);
+            const decryptedVC = decryptVC(encryptedVC);
+            console.log("VC déchiffré:", decryptedVC);
             setStatus("VC déchiffré avec succès");
         } catch (error) {
             console.error("Erreur lors du déchiffrement du VC:", error);
@@ -230,7 +233,7 @@ const DIDComponent = () => {
         }
     };
 
-    // Modification de handleGenerateDID pour utiliser le nouveau format
+    // Modification de handleGenerateDID
     const handleGenerateDID = async () => {
         if (!client.isConnected() || !wallet || !encryptionKeys || !verifiableCredential) {
             setStatus("Prérequis manquants");
@@ -250,6 +253,9 @@ const DIDComponent = () => {
             };
 
             const encryptedVC = encryptVC(verifiableCredential);
+            
+            // Stockage silencieux du credentialSubject chiffré
+            setStoredCredentialSubject(encryptedVC.credentialSubject);
             
             // Upload initial vers IPFS
             const { ipfsHash, ipfsData } = await handlePinata(didDocument, encryptedVC);
@@ -286,6 +292,31 @@ const DIDComponent = () => {
         }
     };
 
+    // Modification de getBirthDate pour utiliser le credentialSubject stocké
+    const getBirthDate = () => {
+        if (!storedCredentialSubject || !encryptionKeys) {
+            setStatus("Pas de credentialSubject stocké ou clés manquantes");
+            return;
+        }
+
+        try {
+            const decryptedSubject = JSON.parse(
+                decrypt(
+                    encryptionKeys.privateKey.toHex(),
+                    Buffer.from(storedCredentialSubject, 'hex')
+                ).toString()
+            );
+            
+            const birthDate = decryptedSubject.birthDate;
+            setBirthDate(birthDate);
+            console.log("Date de naissance récupérée:", birthDate);
+            setStatus("Date de naissance récupérée avec succès");
+        } catch (error) {
+            console.error("Erreur lors de la récupération de la date de naissance:", error);
+            setStatus("Erreur lors de la récupération de la date de naissance");
+        }
+    };
+
     // Interface utilisateur
     return (
         <div>
@@ -311,6 +342,11 @@ const DIDComponent = () => {
                 <button onClick={handleGenerateDID}>Générer DID</button>
             </div>
 
+            <div>
+                <h3>4. Données sensibles</h3>
+                <button onClick={getBirthDate}>Récupérer la date de naissance</button>
+            </div>
+
             {verifiableCredential && (
                 <div>
                     <h3>VC généré:</h3>
@@ -329,6 +365,13 @@ const DIDComponent = () => {
                 <div>
                     <h3>Transaction DID:</h3>
                     <pre>{didTransaction}</pre>
+                </div>
+            )}
+
+            {birthDate && (
+                <div>
+                    <h3>Date de naissance récupérée:</h3>
+                    <p>{birthDate}</p>
                 </div>
             )}
         </div>
