@@ -86,27 +86,6 @@ const DIDComponent = () => {
 
             await pinata.upload.file(formData).then((result) => {});
 
-            // // Upload to Pinata using their API
-            // const response = await fetch(
-            //     "https://api.pinata.cloud/pinning/pinFileToIPFS",
-            //     {
-            //         method: "POST",
-            //         headers: {
-            //             Authorization: `Bearer YOUR_PINATA_JWT_TOKEN`, // Replace with your actual token
-            //         },
-            //         body: formData,
-            //     }
-            // );
-
-            // if (!response.ok) {
-            //     throw new Error("Failed to upload file to Pinata");
-            // }
-
-            // const result = await response.json();
-            // console.log("Uploaded to Pinata:", result);
-            // alert(
-            //     `File uploaded successfully! IPFS URL: https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`
-            // );
         } catch (error) {
             console.error("Error uploading file:", error);
             alert("File upload failed. Check the console for more details.");
@@ -137,7 +116,6 @@ const DIDComponent = () => {
                 },
             ],
         });
-        // handlePinata(didDocument);
         try {
             const preparedTransaction = await client.autofill({
                 TransactionType: "DIDSet",
