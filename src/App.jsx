@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Home from './components/Home/Home';
 import Credentials from './components/Credentials/Credentials';
+import DIDCreation from './components/DIDCreation/DIDCreation';
 import Navbar from './components/Navbar/Navbar';
 import WalletConnection from './components/WalletConnection/WalletConnection';
 import Profile from './components/Profile/Profile';
@@ -42,9 +43,20 @@ const App = () => {
                         path="/wallet-connection"
                         element={
                             isWalletConnected ? (
-                                <Navigate to="/profile" /> // Redirect to profile if already connected
+                                <Navigate to="/did-creation" />
                             ) : (
                                 <WalletConnection onWalletConnected={handleWalletConnected} />
+                            )
+                        }
+                    />
+                    {/* Route for DID creation */}
+                    <Route
+                        path="/did-creation"
+                        element={
+                            isWalletConnected ? (
+                                <DIDCreation />
+                            ) : (
+                                <Navigate to="/wallet-connection" />
                             )
                         }
                     />

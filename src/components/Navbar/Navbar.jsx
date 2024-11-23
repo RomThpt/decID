@@ -9,7 +9,12 @@ const Navbar = ({ onLogout }) => {
     <nav className="navbar">
       <ul className="navbar-nav">
         <li className="nav-item">
-        <NavLink to="/profile" className={setActive}>
+          <NavLink to="/did-creation" className={setActive}>
+            Create DID
+          </NavLink>
+        </li>
+        <li className="nav-item">
+          <NavLink to="/profile" className={setActive}>
             Profile
           </NavLink>
         </li>

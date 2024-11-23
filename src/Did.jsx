@@ -64,9 +64,16 @@ const DIDComponent = () => {
     };
 
     // Connexion du wallet depuis la clé privée
-    const connectWallet = () => {
-        setWallet(Wallet.fromSeed(import.meta.env.VITE_PRIVATE_KEY));
-        setStatus("Wallet connected");
+    const connectWallet = async () => {
+        try {
+            const newWallet = Wallet.fromSeed(import.meta.env.VITE_PRIVATE_KEY);
+            setWallet(newWallet);
+            console.log("Wallet connected");
+            return newWallet;
+        } catch (error) {
+            console.error("Erreur de connexion wallet:", error);
+            throw new Error("Échec de la connexion du wallet");
+        }
     };
 
     // Génération des clés de chiffrement pour le VC
@@ -75,14 +82,14 @@ const DIDComponent = () => {
             const privateKey = new PrivateKey();
             const publicKey = privateKey.publicKey;
             setEncryptionKeys({ privateKey, publicKey });
-            setStatus("Clés de chiffrement générées");
-            console.log("Clés générées:", {
+            setStatus("Encryption keys generated");
+            console.log("Generated keys:", {
                 privateKey: privateKey.toHex(),
                 publicKey: publicKey.toHex()
             });
         } catch (error) {
-            console.error("Erreur lors de la génération des clés:", error);
-            setStatus("Erreur lors de la génération des clés");
+            console.error("Error generating keys:", error);
+            setStatus("Error generating keys");
         }
     };
 
@@ -157,43 +164,57 @@ const DIDComponent = () => {
         }
     };
 
-    // Génération du Verifiable Credential
-    const generateVC = () => {
-        if (!wallet) {
-            setStatus("Wallet non connecté");
-            return;
-        }
-
+    // Modification de la fonction generateVC
+    const generateVC = async () => {
         try {
+            // Connexions automatiques avec await
+            if (!client.isConnected()) {
+                await connectClient();
+            }
+
+            // S'assurer que le wallet est connecté et disponible
+            let currentWallet = wallet;
+            if (!currentWallet) {
+                try {
+                    currentWallet = await connectWallet(); // Utiliser directement le wallet retourné
+                    if (!currentWallet || !currentWallet.classicAddress) {
+                        throw new Error("Impossible de récupérer l'adresse du wallet");
+                    }
+                } catch (error) {
+                    console.error("Erreur de connexion wallet:", error);
+                    throw new Error("Échec de la connexion du wallet");
+                }
+            }
+
             const proofData = {
                 id: `urn:uuid:${crypto.randomUUID()}`,
                 type: vcTemplate.type,
             };
 
-            //Credential signature
+            // Credential signature avec le wallet vérifié
             const vc = {
                 ...vcTemplate,
                 "id": proofData.id,
                 "issuer": `did:xrpl:rMuwGvcUxnS1LT4xXDaVZGZGbBtrUD5bgd`,
                 "credentialSubject": {
                     ...vcTemplate.credentialSubject,
-                    "id": `did:xrpl:${wallet.classicAddress}`
+                    "id": `did:xrpl:${currentWallet.classicAddress}`
                 },
                 "proof": {
                     "type": "XrplSignature2023",
-                    "verificationMethod": `did:xrpl:${wallet.classicAddress}#key-1`,
+                    "verificationMethod": `did:xrpl:${currentWallet.classicAddress}#key-1`,
                     "proofPurpose": "assertionMethod",
-                    "proofValue": signData(wallet, proofData),
+                    "proofValue": signData(currentWallet, proofData),
                     "signedData": proofData
                 }
             };
 
             setVerifiableCredential(vc);
-            setStatus("Verifiable Credential généré");
+            setStatus("Verifiable Credential generated");
             return vc;
         } catch (error) {
-            console.error("Erreur génération VC:", error);
-            setStatus("Erreur génération VC");
+            console.error("Error generating VC:", error);
+            setStatus(`Error generating VC: ${error.message}`);
             return null;
         }
     };
@@ -201,46 +222,54 @@ const DIDComponent = () => {
     // Modifions handleEncryptVC pour gérer le nouveau format
     const handleEncryptVC = () => {
         if (!verifiableCredential || !encryptionKeys) {
-            setStatus("Générez d'abord le VC et les clés de chiffrement");
+            setStatus("Generate VC and encryption keys first");
             return;
         }
 
         try {
             const encrypted = encryptVC(verifiableCredential);
             setEncryptedVC(encrypted);
-            setStatus("VC chiffré avec succès");
-            console.log("VC avec credentialSubject chiffré:", encrypted);
+            setStatus("VC encrypted successfully");
+            console.log("VC with encrypted credentialSubject:", encrypted);
         } catch (error) {
-            console.error("Erreur lors du chiffrement du VC:", error);
-            setStatus("Erreur lors du chiffrement du VC");
+            console.error("Error encrypting VC:", error);
+            setStatus("Error encrypting VC");
         }
     };
 
     // Modification de handleDecryptVC pour enlever l'extraction de la date de naissance
     const handleDecryptVC = () => {
         if (!encryptedVC || !encryptionKeys) {
-            setStatus("Pas de VC chiffré disponible");
+            setStatus("No encrypted VC available");
             return;
         }
 
         try {
             const decryptedVC = decryptVC(encryptedVC);
-            console.log("VC déchiffré:", decryptedVC);
-            setStatus("VC déchiffré avec succès");
+            console.log("Decrypted VC:", decryptedVC);
+            setStatus("VC decrypted successfully");
         } catch (error) {
-            console.error("Erreur lors du déchiffrement du VC:", error);
-            setStatus("Erreur lors du déchiffrement du VC");
+            console.error("Error decrypting VC:", error);
+            setStatus("Error decrypting VC");
         }
     };
 
     // Modification de handleGenerateDID
     const handleGenerateDID = async () => {
-        if (!client.isConnected() || !wallet || !encryptionKeys || !verifiableCredential) {
-            setStatus("Prérequis manquants");
+        if (!encryptionKeys || !verifiableCredential) {
+            setStatus("Missing prerequisites: encryption keys or credential");
             return;
         }
 
         try {
+            // Connexion automatique si nécessaire
+            if (!client.isConnected()) {
+                await connectClient();
+            }
+            if (!wallet) {
+                connectWallet();
+            }
+
             const didDocument = {
                 "@context": ["https://www.w3.org/ns/did/v1"],
                 id: `did:xrpl:${wallet.classicAddress}`,
@@ -285,17 +314,17 @@ const DIDComponent = () => {
 
             setDidTransaction(JSON.stringify(ipfsData, null, 2));
             console.log('Document final sur IPFS:', ipfsData);
-            setStatus("DID généré avec succès");
+            setStatus("DID generated successfully");
         } catch (error) {
-            console.error("Erreur génération DID:", error);
-            setStatus("Erreur génération DID");
+            console.error("Error generating DID:", error);
+            setStatus("Error generating DID");
         }
     };
 
     // Modification de getBirthDate pour ne retourner qu'un booléen
     const getBirthDate = () => {
         if (!storedCredentialSubject || !encryptionKeys) {
-            setStatus("Pas de credentialSubject stocké ou clés manquantes");
+            setStatus("No stored credentialSubject or missing keys");
             return false;
         }
 
@@ -318,11 +347,11 @@ const DIDComponent = () => {
                 ? age - 1 >= 18 
                 : age >= 18;
 
-            setStatus(isAdult ? "Oui" : "Non");
+            setStatus(isAdult ? "Yes" : "No");
             return isAdult;
         } catch (error) {
-            console.error("Erreur lors de la vérification de l'âge:", error);
-            setStatus("Erreur lors de la vérification de l'âge");
+            console.error("Error verifying age:", error);
+            setStatus("Error verifying age");
             return false;
         }
     };
@@ -330,7 +359,7 @@ const DIDComponent = () => {
     // Ajout de la fonction de vérification de la nationalité
     const checkNationality = () => {
         if (!storedCredentialSubject || !encryptionKeys) {
-            setStatus("Pas de credentialSubject stocké ou clés manquantes");
+            setStatus("No stored credentialSubject or missing keys");
             return false;
         }
 
@@ -343,11 +372,11 @@ const DIDComponent = () => {
             );
             
             const isFrench = decryptedSubject.nationality === "French";
-            setStatus(isFrench ? "Oui" : "Non");
+            setStatus(isFrench ? "Yes" : "No");
             return isFrench;
         } catch (error) {
-            console.error("Erreur lors de la vérification de la nationalité:", error);
-            setStatus("Erreur lors de la vérification de la nationalité");
+            console.error("Error verifying nationality:", error);
+            setStatus("Error verifying nationality");
             return false;
         }
     };
@@ -355,7 +384,7 @@ const DIDComponent = () => {
     // Ajout des fonctions de vérification pour Italien et Anglais
     const checkItalianNationality = () => {
         if (!storedCredentialSubject || !encryptionKeys) {
-            setStatus("Pas de credentialSubject stocké ou clés manquantes");
+            setStatus("No stored credentialSubject or missing keys");
             return false;
         }
 
@@ -368,18 +397,18 @@ const DIDComponent = () => {
             );
             
             const isItalian = decryptedSubject.nationality === "Italian";
-            setStatus(isItalian ? "Oui" : "Non");
+            setStatus(isItalian ? "Yes" : "No");
             return isItalian;
         } catch (error) {
-            console.error("Erreur lors de la vérification de la nationalité:", error);
-            setStatus("Erreur lors de la vérification de la nationalité");
+            console.error("Error verifying nationality:", error);
+            setStatus("Error verifying nationality");
             return false;
         }
     };
 
     const checkEnglishNationality = () => {
         if (!storedCredentialSubject || !encryptionKeys) {
-            setStatus("Pas de credentialSubject stocké ou clés manquantes");
+            setStatus("No stored credentialSubject or missing keys");
             return false;
         }
 
@@ -392,11 +421,11 @@ const DIDComponent = () => {
             );
             
             const isEnglish = decryptedSubject.nationality === "English";
-            setStatus(isEnglish ? "Oui" : "Non");
+            setStatus(isEnglish ? "Yes" : "No");
             return isEnglish;
         } catch (error) {
-            console.error("Erreur lors de la vérification de la nationalité:", error);
-            setStatus("Erreur lors de la vérification de la nationalité");
+            console.error("Error verifying nationality:", error);
+            setStatus("Error verifying nationality");
             return false;
         }
     };
@@ -404,60 +433,60 @@ const DIDComponent = () => {
     // Interface utilisateur
     return (
         <div>
-            <h1>Générer un DID et un Credential via XRPL</h1>
+            <h1>Generate DID and Credential via XRPL</h1>
             <p>Status: {status}</p>
             
             <div>
                 <h3>1. Configuration</h3>
-                <button onClick={connectClient}>Connect XRPL</button>
-                <button onClick={connectWallet}>Connect Wallet</button>
-                <button onClick={generateEncryptionKeys}>Générer clés</button>
+                <button onClick={generateEncryptionKeys}>Generate Keys</button>
             </div>
 
             <div>
                 <h3>2. Credentials</h3>
-                <button onClick={generateVC}>Générer VC</button>
-                <button onClick={handleEncryptVC}>Chiffrer VC</button>
-                <button onClick={handleDecryptVC}>Déchiffrer VC</button>
+                <button onClick={async () => {
+                    await generateVC();
+                }}>Generate VC</button>
+                <button onClick={handleEncryptVC}>Encrypt VC</button>
+                <button onClick={handleDecryptVC}>Decrypt VC</button>
             </div>
 
             <div>
                 <h3>3. DID</h3>
-                <button onClick={handleGenerateDID}>Générer DID</button>
+                <button onClick={handleGenerateDID}>Generate DID</button>
             </div>
 
             <div>
-                <h3>4. Vérification</h3>
-                <button onClick={getBirthDate}>+ de 18 ans ?</button>
-                <button onClick={checkNationality}>Nationalité Française ?</button>
-                <button onClick={checkItalianNationality}>Nationalité Italienne ?</button>
-                <button onClick={checkEnglishNationality}>Nationalité Anglaise ?</button>
+                <h3>4. Verification</h3>
+                <button onClick={getBirthDate}>Over 18 ?</button>
+                <button onClick={checkNationality}>French Nationality ?</button>
+                <button onClick={checkItalianNationality}>Italian Nationality ?</button>
+                <button onClick={checkEnglishNationality}>English Nationality ?</button>
             </div>
 
             {verifiableCredential && (
                 <div>
-                    <h3>VC généré:</h3>
+                    <h3>Generated VC:</h3>
                     <pre>{JSON.stringify(verifiableCredential, null, 2)}</pre>
                 </div>
             )}
 
             {encryptedVC && (
                 <div>
-                    <h3>VC Chiffré:</h3>
+                    <h3>Encrypted VC:</h3>
                     <pre>{JSON.stringify(encryptedVC, null, 2)}</pre>
                 </div>
             )}
 
             {didTransaction && (
                 <div>
-                    <h3>Transaction DID:</h3>
+                    <h3>DID Transaction:</h3>
                     <pre>{didTransaction}</pre>
                 </div>
             )}
 
             {status && status !== "Not connected to XRPL" && (
                 <div>
-                    <h3>Résultat de la vérification:</h3>
+                    <h3>Verification Result:</h3>
                     <p>{status}</p>
                 </div>
             )}

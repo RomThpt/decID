@@ -1,0 +1,93 @@
+.did-creation-container {
+    padding-top: 120px;
+    min-height: 100vh;
+    background-color: #000743;
+} 
+
+.did-content {
+    padding: 20px;
+    color: white;
+}
+
+.did-content h1 {
+    font-size: 2rem;
+    margin-bottom: 30px;
+    color: white;
+}
+
+.did-content button {
+    margin: 10px;
+    padding: 12px 24px;
+    border: 2px solid #1aa4ff;
+    font-size: 16px;
+    border-radius: 50px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #1aa4ff;
+    transition: background-color 0.3s ease-in-out, transform 0.3s ease;
+    font-family: "Unbounded", Arial, sans-serif;
+    letter-spacing: 1px;
+}
+
+.did-content button:hover {
+    background-color: #000637;
+    color: white;
+    border-color: #1aa4ff;
+}
+
+.did-content h3 {
+    color: #ffffffb3;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.did-content p {
+    color: white;
+    margin: 10px 0;
+}
+
+.did-content pre {
+    background-color: #000637;
+    padding: 15px;
+    border-radius: 10px;
+    overflow-x: auto;
+    color: #ffffff;
+    margin: 15px 0;
+}
+
+.did-content div > div {
+    margin: 20px 0;
+}
+
+/* Style pour les sections de configuration */
+.did-content div > div > h3 {
+    color: #ffffffb3;
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+}
+
+/* Style pour les messages de statut */
+.did-content div > p:first-of-type {
+    color: #1aa4ff;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+/* Style pour les résultats de vérification */
+.did-content div > div:last-child {
+    margin-top: 30px;
+    padding: 15px;
+    background-color: #000637;
+    border-radius: 10px;
+}
+
+.did-content div > div:last-child h3 {
+    color: #1aa4ff;
+}
+
+.did-content div > div:last-child p {
+    color: white;
+    font-size: 1.1rem;
+} 
