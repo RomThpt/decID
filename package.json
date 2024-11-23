@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.4",
     "fs": "^0.0.1-security",
     "ipfs-http-client": "^60.0.1",
     "pinata-web3": "^0.5.2",

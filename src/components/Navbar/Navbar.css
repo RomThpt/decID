@@ -1,73 +1,73 @@
-/* Import des polices si via un CDN */
+/* Import fonts from a CDN */
 @import url('https://fonts.cdnfonts.com/css/circular-std');
 @import url('https://fonts.cdnfonts.com/css/unbounded');
 
-/* Barre de navigation principale */
+/* Main navigation bar */
 .navbar {
     width: 100%;
-    background-color: #fff; /* Correspond au fond global */
+    background-color: #fff; /* Matches the global background */
     color: white;
     position: fixed;
     bottom: 0;
     left: 0;
     transform: none;
     z-index: 1000;
-    border-top: 2px solid #1aa4ff; /* Ligne de séparation en bleu clair */
-    padding: 15px; /* Padding uniforme */
-    font-family: "Circular Std", Arial, sans-serif; /* Police principale */
-    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.3); /* Ombre douce */
+    border-top: 2px solid #1aa4ff; /* Light blue separating line */
+    padding: 15px; /* Uniform padding */
+    font-family: "Circular Std", Arial, sans-serif; /* Primary font */
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.3); /* Soft shadow */
 }
 
-/* Conteneur des éléments de navigation */
+/* Navigation items container */
 .navbar-nav {
     list-style: none;
     display: flex;
     justify-content: space-around;
-    align-items: center; /* Centrer les éléments verticalement */
+    align-items: center; /* Centers items vertically */
     margin: 0;
     padding: 0;
     overflow: visible;
 }
 
-/* Élément individuel de la navbar */
+/* Individual navigation item */
 .nav-item {
     padding: 10px 15px;
     transition: background-color 0.3s ease, color 0.3s ease;
     overflow: visible;
 }
 
-/* Lien de navigation */
+/* Navigation link */
 .nav-link {
-    color: #1aa4ff; /* Couleur des liens en bleu clair */
+    color: #a2c3d9; /* Light blue link color */
     text-decoration: none;
     font-weight: bold;
     font-size: 16px;
-    font-family: "Unbounded", Arial, sans-serif; /* Police principale */
-    letter-spacing: 1px; /* Espacement entre les lettres */
-    transition: transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease; /* Transition fluide */
+    font-family: "Unbounded", Arial, sans-serif; /* Primary font */
+    letter-spacing: 1px; /* Spacing between letters */
+    transition: transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease; /* Smooth transition */
 }
 
-/* Effet au survol des liens */
+/* Hover effect on links */
 .navbar .nav-link:hover {
-    color: #791aff; /* Change la couleur en blanc */
-    text-shadow: 0 0 0 rgba(0, 0, 0, 0.5); /* Ombre douce */
-    transition: color 0.3s ease; /* Animation fluide */
+    color: #791aff; /* Changes color to purple */
+    text-shadow: 0 0 0 rgba(0, 0, 0, 0.5); /* Soft shadow */
+    transition: color 0.3s ease; /* Smooth animation */
 }
 
-/* Lien actif */
+/* Active link */
 .nav-link.active {
-    color: #000637; /* Couleur blanche pour le lien actif */
+    color: #000637; /* Dark blue for active link */
 }
 
-/* Médias queries pour les écrans de taille mobile */
+/* Media queries for mobile screens */
 @media (max-width: 600px) {
     .navbar {
         padding: 10px 0;
-        border-top: 1px solid #1aa4ff; /* Ligne de séparation plus fine pour les petits écrans */
+        border-top: 1px solid #1aa4ff; /* Thinner separating line for smaller screens */
     }
 
     .nav-link {
-        font-size: 14px; /* Taille de police légèrement réduite */
+        font-size: 14px; /* Slightly reduced font size */
     }
 
     .nav-item {
