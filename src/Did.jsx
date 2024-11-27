@@ -3,11 +3,17 @@ import { Client, Wallet } from "xrpl";
 import { pinata } from "./Pinata.jsx";
 import { encrypt, decrypt, PrivateKey } from "eciesjs";
 import vcTemplate from "./assets/verifiableCredential.json";
+import { Buffer } from 'buffer';
 
-// Fonction pour signer des données avec le wallet XRPL
+if (!window.Buffer) {
+    window.Buffer = Buffer;
+}
+
+
+// Function to sign data with the XRPL wallet
 const signData = (wallet, data) => {
     try {
-        // Crée une transaction Payment avec les données dans Memos (pratique standard XRPL)
+        // Creates a Payment transaction with the data in Memos (standard XRPL practice)
         const tx = {
             TransactionType: "Payment",
             Account: wallet.classicAddress,
@@ -19,33 +25,35 @@ const signData = (wallet, data) => {
                 }
             }]
         };
-        return wallet.sign(tx).hash; // Retourne le hash de la transaction signée
+        return wallet.sign(tx).hash; // Returns the hash of the signed transaction
     } catch (error) {
-        console.error("Erreur lors de la signature:", error);
+        console.error("Error during signing:", error);
         throw error;
     }
 };
 
+
 const DIDComponent = () => {
-    // États essentiels du composant
-    const [didTransaction, setDidTransaction] = useState(""); // Stocke la transaction DID
-    const [status, setStatus] = useState("Not connected to XRPL"); // État de la connexion
-    const [wallet, setWallet] = useState(null); // Wallet XRPL
-    const [encryptionKeys, setEncryptionKeys] = useState(null); // Paire de clés pour le chiffrement
-    const [verifiableCredential, setVerifiableCredential] = useState(null); // VC non chiffré
-    const [encryptedVC, setEncryptedVC] = useState(null); // VC chiffré
-    const [client] = useState(new Client("wss://s.devnet.rippletest.net:51233")); // Client XRPL
+    // Essential states of the component
+    const [didTransaction, setDidTransaction] = useState(""); // Stores the DID transaction
+    const [status, setStatus] = useState("Not connected to XRPL"); // Connection status
+    const [wallet, setWallet] = useState(null); // XRPL Wallet
+    const [encryptionKeys, setEncryptionKeys] = useState(null); // Pair of keys for encryption
+    const [verifiableCredential, setVerifiableCredential] = useState(null); // Unencrypted VC
+    const [encryptedVC, setEncryptedVC] = useState(null); // Encrypted VC
+    const [client] = useState(new Client("wss://s.devnet.rippletest.net:51233")); // XRPL Client
     const [birthDate, setBirthDate] = useState(null);
     const [storedCredentialSubject, setStoredCredentialSubject] = useState(null);
 
-    // Connexion au réseau XRPL
+
+    // Connect to the XRPL network
     const connectClient = async () => {
         try {
             if (!client.isConnected()) {
                 await client.connect();
                 setStatus("Connected to XRPL Testnet");
                 
-                // Ajout d'un gestionnaire de déconnexion
+                // Add a disconnect handler
                 client.on('disconnected', async () => {
                     setStatus("Disconnected from XRPL. Attempting to reconnect...");
                     try {
@@ -63,7 +71,7 @@ const DIDComponent = () => {
         }
     };
 
-    // Connexion du wallet depuis la clé privée
+    // Connect the wallet using the private key
     const connectWallet = async () => {
         try {
             const newWallet = Wallet.fromSeed(import.meta.env.VITE_PRIVATE_KEY);
@@ -76,7 +84,7 @@ const DIDComponent = () => {
         }
     };
 
-    // Génération des clés de chiffrement pour le VC
+    // Generate encryption keys for the VC
     const generateEncryptionKeys = () => {
         try {
             const privateKey = new PrivateKey();
@@ -93,28 +101,29 @@ const DIDComponent = () => {
         }
     };
 
-    // Modifions la fonction encryptVC pour ne chiffrer que les données sensibles
+    // Modify the encryptVC function to only encrypt sensitive data
     const encryptVC = (vc) => {
         if (!encryptionKeys) throw new Error("Clés de chiffrement non générées");
         
-        // On ne chiffre que le credentialSubject
+        // Only encrypt the credentialSubject
         const encryptedSubject = encrypt(
             encryptionKeys.publicKey.toHex(),
             Buffer.from(JSON.stringify(vc.credentialSubject))
         ).toString('hex');
 
-        // On retourne le VC avec seulement le credentialSubject chiffré
+        // Return the VC with only the encrypted credentialSubject
         return {
             ...vc,
-            credentialSubject: encryptedSubject // Remplace le credentialSubject par sa version chiffrée
+            // Replaces the credentialSubject with its encrypted version
+            credentialSubject: encryptedSubject
         };
     };
 
-    // Modifions aussi la fonction de déchiffrement
+    // Let's also modify the decryption function
     const decryptVC = (encryptedVC) => {
         if (!encryptionKeys) throw new Error("Clés de chiffrement non disponibles");
         
-        // Déchiffre le credentialSubject
+        // Decrypts the credentialSubject
         const decryptedSubject = JSON.parse(
             decrypt(
                 encryptionKeys.privateKey.toHex(),
@@ -122,24 +131,25 @@ const DIDComponent = () => {
             ).toString()
         );
 
-        // Retourne le VC complet avec le credentialSubject déchiffré
+        // Returns the complete VC with the decrypted credentialSubject
         return {
             ...encryptedVC,
             credentialSubject: decryptedSubject
         };
     };
 
-    // Upload du DID et VC sur IPFS via Pinata
+    // Upload the DID and VC to IPFS via Pinata
     const handlePinata = async (didDocument, encryptedVC) => {
         try {
-            // Création de l'objet dans le format exact souhaité
+            // Create the object in the exact desired format
             const ipfsData = {
                 did: didDocument.id,
                 didDocument: didDocument,
                 verifiableCredential: encryptedVC,
-                transaction: null, // Sera mis à jour après la transaction
-                ipfsUrl: null, // Sera mis à jour après l'upload
-                gatewayUrl: null // Sera mis à jour après l'upload
+                transaction: null, // Will be updated after the transaction
+                ipfsUrl: null, // Will be updated after the upload
+                gatewayUrl: null // Will be updated after the upload
+
             };
 
             const blob = new Blob([JSON.stringify(ipfsData)], { 
@@ -150,7 +160,7 @@ const DIDComponent = () => {
             });
             const result = await pinata.upload.file(file);
             
-            // Mise à jour des URLs dans l'objet
+            // Update URLs in the object
             ipfsData.ipfsUrl = `ipfs://${result.IpfsHash}`;
             ipfsData.gatewayUrl = `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
             
@@ -164,19 +174,20 @@ const DIDComponent = () => {
         }
     };
 
-    // Modification de la fonction generateVC
+    // Modification of the generateVC function
     const generateVC = async () => {
         try {
-            // Connexions automatiques avec await
+            // Automatic connections with await
             if (!client.isConnected()) {
                 await connectClient();
             }
 
-            // S'assurer que le wallet est connecté et disponible
+            // Ensure the wallet is connected and available
             let currentWallet = wallet;
             if (!currentWallet) {
                 try {
-                    currentWallet = await connectWallet(); // Utiliser directement le wallet retourné
+                    // Use the returned wallet directly
+                    currentWallet = await connectWallet();
                     if (!currentWallet || !currentWallet.classicAddress) {
                         throw new Error("Impossible de récupérer l'adresse du wallet");
                     }
@@ -191,7 +202,7 @@ const DIDComponent = () => {
                 type: vcTemplate.type,
             };
 
-            // Credential signature avec le wallet vérifié
+            // Credential signature with the verified wallet
             const vc = {
                 ...vcTemplate,
                 "id": proofData.id,
@@ -219,7 +230,7 @@ const DIDComponent = () => {
         }
     };
 
-    // Modifions handleEncryptVC pour gérer le nouveau format
+    // Modify handleEncryptVC to handle the new format
     const handleEncryptVC = () => {
         if (!verifiableCredential || !encryptionKeys) {
             setStatus("Generate VC and encryption keys first");
@@ -237,7 +248,7 @@ const DIDComponent = () => {
         }
     };
 
-    // Modification de handleDecryptVC pour enlever l'extraction de la date de naissance
+    // Modify handleDecryptVC to remove birth date extraction
     const handleDecryptVC = () => {
         if (!encryptedVC || !encryptionKeys) {
             setStatus("No encrypted VC available");
@@ -254,7 +265,7 @@ const DIDComponent = () => {
         }
     };
 
-    // Modification de handleGenerateDID
+    // Modification of handleGenerateDID
     const handleGenerateDID = async () => {
         if (!encryptionKeys || !verifiableCredential) {
             setStatus("Missing prerequisites: encryption keys or credential");
@@ -262,7 +273,7 @@ const DIDComponent = () => {
         }
 
         try {
-            // Connexion automatique si nécessaire
+            // Automatic connection if necessary
             if (!client.isConnected()) {
                 await connectClient();
             }
@@ -283,10 +294,10 @@ const DIDComponent = () => {
 
             const encryptedVC = encryptVC(verifiableCredential);
             
-            // Stockage silencieux du credentialSubject chiffré
+            // Silent storage of the encrypted credentialSubject
             setStoredCredentialSubject(encryptedVC.credentialSubject);
             
-            // Upload initial vers IPFS
+            // Initial upload to IPFS
             const { ipfsHash, ipfsData } = await handlePinata(didDocument, encryptedVC);
             
             const preparedTransaction = await client.autofill({
@@ -300,10 +311,10 @@ const DIDComponent = () => {
                 wallet.sign(preparedTransaction).tx_blob
             );
 
-            // Mise à jour de l'objet avec les informations de transaction
+            // Update the object with transaction information
             ipfsData.transaction = result;
 
-            // Mise à jour du fichier sur IPFS avec les informations de transaction
+            // Update the file on IPFS with transaction information
             const finalBlob = new Blob([JSON.stringify(ipfsData)], { 
                 type: "application/json" 
             });
@@ -321,7 +332,7 @@ const DIDComponent = () => {
         }
     };
 
-    // Modification de getBirthDate pour ne retourner qu'un booléen
+    // Modify getBirthDate to return only a boolean
     const getBirthDate = () => {
         if (!storedCredentialSubject || !encryptionKeys) {
             setStatus("No stored credentialSubject or missing keys");
@@ -342,7 +353,7 @@ const DIDComponent = () => {
             const age = today.getFullYear() - birth.getFullYear();
             const monthDiff = today.getMonth() - birth.getMonth();
             
-            // Ajustement si le mois de naissance n'est pas encore passé cette année
+            // Adjustment if the birth month has not yet passed this year
             const isAdult = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate()) 
                 ? age - 1 >= 18 
                 : age >= 18;
@@ -356,7 +367,7 @@ const DIDComponent = () => {
         }
     };
 
-    // Ajout de la fonction de vérification de la nationalité
+    // Add the nationality verification function
     const checkNationality = () => {
         if (!storedCredentialSubject || !encryptionKeys) {
             setStatus("No stored credentialSubject or missing keys");
@@ -381,7 +392,7 @@ const DIDComponent = () => {
         }
     };
 
-    // Ajout des fonctions de vérification pour Italien et Anglais
+    // Add verification functions for Italian and English
     const checkItalianNationality = () => {
         if (!storedCredentialSubject || !encryptionKeys) {
             setStatus("No stored credentialSubject or missing keys");
@@ -430,7 +441,7 @@ const DIDComponent = () => {
         }
     };
 
-    // Interface utilisateur
+    // User Interface
     return (
         <div>
             <h1>Generate DID and Credential via XRPL</h1>

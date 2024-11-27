@@ -5,17 +5,17 @@
 /* Main navigation bar */
 .navbar {
     width: 100%;
-    background-color: #fff; /* Matches the global background */
+    background-color: #fff;
     color: white;
     position: fixed;
     bottom: 0;
     left: 0;
     transform: none;
     z-index: 1000;
-    border-top: 2px solid #1aa4ff; /* Light blue separating line */
-    padding: 15px; /* Uniform padding */
-    font-family: "Circular Std", Arial, sans-serif; /* Primary font */
-    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.3); /* Soft shadow */
+    border-top: 2px solid #1aa4ff;
+    padding: 15px;
+    font-family: "Circular Std", Arial, sans-serif;
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Navigation items container */
@@ -23,7 +23,7 @@
     list-style: none;
     display: flex;
     justify-content: space-around;
-    align-items: center; /* Centers items vertically */
+    align-items: center;
     margin: 0;
     padding: 0;
     overflow: visible;
@@ -38,36 +38,36 @@
 
 /* Navigation link */
 .nav-link {
-    color: #a2c3d9; /* Light blue link color */
+    color: #a2c3d9;
     text-decoration: none;
     font-weight: bold;
     font-size: 16px;
-    font-family: "Unbounded", Arial, sans-serif; /* Primary font */
-    letter-spacing: 1px; /* Spacing between letters */
-    transition: transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease; /* Smooth transition */
+    font-family: "Unbounded", Arial, sans-serif;
+    letter-spacing: 1px;
+    transition: transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease;
 }
 
 /* Hover effect on links */
 .navbar .nav-link:hover {
-    color: #791aff; /* Changes color to purple */
-    text-shadow: 0 0 0 rgba(0, 0, 0, 0.5); /* Soft shadow */
-    transition: color 0.3s ease; /* Smooth animation */
+    color: #791aff; 
+    text-shadow: 0 0 0 rgba(0, 0, 0, 0.5);
+    transition: color 0.3s ease;
 }
 
 /* Active link */
 .nav-link.active {
-    color: #000637; /* Dark blue for active link */
+    color: #000637;
 }
 
 /* Media queries for mobile screens */
 @media (max-width: 600px) {
     .navbar {
         padding: 10px 0;
-        border-top: 1px solid #1aa4ff; /* Thinner separating line for smaller screens */
+        border-top: 1px solid #1aa4ff;
     }
 
     .nav-link {
-        font-size: 14px; /* Slightly reduced font size */
+        font-size: 14px;
     }
 
     .nav-item {

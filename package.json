@@ -10,6 +10,9 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+        "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
+        "buffer": "^6.0.3",
         "eciesjs": "^0.4.12",
         "fs": "^0.0.1-security",
         "ipfs-http-client": "^60.0.1",

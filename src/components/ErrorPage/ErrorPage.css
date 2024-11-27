@@ -1,4 +1,3 @@
-/* Global styles for the error page */
 .error-page {
     width: 100%;
     height: 100vh;
@@ -6,8 +5,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: #000637; /* Dark background */
-    color: white; /* White text */
+    background-color: #000637;
+    color: white;
     font-family: "Circular Std", Arial, sans-serif;
     text-align: center;
     padding: 20px;
@@ -17,7 +16,7 @@
     font-size: 120px;
     margin: 0;
     font-family: "Unbounded", Arial, sans-serif;
-    color: #ff4c4c; /* Bright red for the error */
+    color: #ff4c4c;
 }
 
 .error-page p {
@@ -41,5 +40,5 @@
 }
 
 .go-back-button:hover {
-    background-color: #0056b3; /* Slightly darker color on hover */
+    background-color: #0056b3;
 }

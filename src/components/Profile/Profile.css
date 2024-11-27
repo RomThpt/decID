@@ -4,9 +4,9 @@
 
 /* Main container */
 .app-title {
-    font-size: 3rem; /* Title size */
-    margin-bottom: 30px; /* Adjusts the space below the title */
-    margin-top: 80px; /* Removes the space above the title */
+    font-size: 3rem;
+    margin-bottom: 30px;
+    margin-top: 80px; 
     text-align: center;
     font-family: "Unbounded", Arial, sans-serif;
 }
@@ -34,12 +34,12 @@
     border-radius: 15px;
     transition: background-color 0.5s ease-in-out, transform 0.3s ease;
     background-color: #000637;
-    width: 95vw; /* Takes full width of the window */
-    box-sizing: border-box; /* Includes padding and border in total width */
+    width: 95vw; 
+    box-sizing: border-box; 
 }
 
 .category:hover {
-    transform: scale(1.05); /* Slightly enlarges */
+    transform: scale(1.05);
     border-radius: 10px;
 }
 
@@ -55,7 +55,7 @@
 
 /* Changes the title color when hovering over the category */
 .category:hover .category-title {
-    color: white; /* Turns white on hover */
+    color: white; 
 }
 
 /* Buttons inside each category */
@@ -73,7 +73,7 @@
 }
 
 .app-category:hover {
-    background-color: #f5f5dc; /* Slightly darker beige on hover */
+    background-color: #f5f5dc; 
     transform: scale(1.05);
 }
 
@@ -113,7 +113,7 @@
     transition: opacity 0.5s ease-in-out;
 }
 
-/* Bottom description (additional) */
+/* Bottom description*/
 .app-descri {
     font-size: 18px;
     margin-top: 40px;
@@ -128,5 +128,5 @@
 }
 
 html {
-    scroll-behavior: smooth; /* Enables smooth scrolling */
+    scroll-behavior: smooth; 
 }

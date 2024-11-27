@@ -1,6 +1,7 @@
 # 🚀 DecID
 
 **DecID** is a decentralized identity verification system leveraging the power of blockchain technology with the **XRPL** (XRP Ledger). This project aims to provide a secure, transparent, and efficient way to verify user identities while ensuring privacy and compliance.
+With this project, we won second place at IXH24 - Italian XRPL Hackathon 2024 in Rome!
 
 ---
 
@@ -64,10 +65,7 @@ Ensure the following are installed on your system:
 git clone https://github.com/yourusername/DecID.git
 cd DecID
 ```
-```bash
-git clone https://github.com/yourusername/DecID.git
-cd DecID
-```
+
 ### Install Dependencies
 
 ```bash
@@ -78,13 +76,14 @@ npm install
 
 Create a .env file in the root directory and provide the following values:
 ```env
-XRPL_NODE_URL=https://s.altnet.rippletest.net:51234
-XRPL_SEED=your_wallet_seed
+VITE_PINATA_JWT=
+VITE_GATEWAY_URL=
+VITE_PRIVATE_KEY=
 ```
 
 ### Run the Application
 ```bash
-npm start
+npm run dev
 ```
 
 ## 📖 Usage
